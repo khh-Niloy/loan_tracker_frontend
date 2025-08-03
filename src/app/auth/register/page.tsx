@@ -34,11 +34,11 @@ export default function RegistrationPage() {
     setIsLoading(true);
     try {
 
-      console.log(data)
+      // console.log(data)
       const response = await createUser(data).unwrap();
-      console.log(response)
+      // console.log(response)
       const { person, token } = response.data;
-      console.log(person)
+      // console.log(person)
       
       // Store user info and navigate to home
       // The backend cookie will handle authentication
