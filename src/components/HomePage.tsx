@@ -19,7 +19,6 @@ export default function HomePage() {
   const dispatch = useAppDispatch();
   
   useEffect(() => {
-    // Load auth from storage/cookies on page load
     dispatch(loadAuthFromStorage());
   }, [dispatch]);
   
@@ -30,7 +29,6 @@ export default function HomePage() {
 
   const payables = Array.isArray(payablesData) ? payablesData : [];
   const receivables = Array.isArray(receivablesData) ? receivablesData : [];
-
 
   const onSubmitLoan = async (data: LoanForm) => {
     if (!user) return;
@@ -48,105 +46,119 @@ export default function HomePage() {
       reset();
       refetchPayables();
       refetchReceivables();
-      toast.success('Loan created successfully!');
+      toast.success('💸 Loan created successfully');
     } catch (error) {
       console.error('Failed to create loan:', error);
-      toast.error('Failed to create loan. Please try again.');
+      toast.error('Failed to create loan');
     } finally {
       setIsCreatingLoan(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-white font-sans">
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="glass border-b border-sage/20">
+        <div className="max-w-7xl mx-auto px-6 pb-4 py-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Loan Tracker</h1>
-              <p className="text-sm text-gray-600">Welcome {user?.name} ({user?.phoneNumber})</p>
+            <div className="slide-in">
+              <h1 className="text-3xl font-display text-charcoal font-medium">LoanTracker</h1>
+              <p className="text-sm text-gray-600 mt-1 font-light">
+                Hello {user?.name} • {user?.phoneNumber}
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-12 gap-5">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-12 gap-4 sm:gap-6">
           {/* Create Loan Form */}
-          <div className="col-span-4 bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Create New Loan</h2>
-            <form onSubmit={handleSubmit(onSubmitLoan)} className="grid grid-cols-2 gap-5">
-              <div>
+          <div className="col-span-12 card-modern slide-in" style={{animationDelay: '0.1s'}}>
+            <h2 className="text-lg sm:text-xl font-display font-medium text-charcoal mb-4 sm:mb-6">Create New Loan</h2>
+            <form onSubmit={handleSubmit(onSubmitLoan)} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Amount *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">Amount</label>
                   <input
-                    {...register('amount', { required: 'Amount is required', pattern: { value: /^\d+\.?\d*$/, message: 'Please enter a valid amount' } })}
+                    {...register('amount', { 
+                      required: 'Amount is required', 
+                      pattern: { value: /^\d+\.?\d*$/, message: 'Please enter a valid amount' } 
+                    })}
                     type="number"
                     step="0.01"
                     required
-                    className="mt-1 block w-full text-black border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="input-modern w-full placeholder-gray-400"
                     placeholder="0.00"
                   />
-                  {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
+                  {errors.amount && <p className="text-sm text-coral mt-1">{errors.amount.message}</p>}
                 </div>
-  
+
                 <div>
-                  <label className="block text-sm mt-5 font-medium text-gray-700">Borrower's Name *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">{`Lender's Name`}</label>
                   <input
                     {...register('loanGiverName', { required: 'Name is required' })}
                     type="text"
                     required
-                    className="mt-1 block w-full text-black border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="input-modern w-full placeholder-gray-400"
                     placeholder="Full name"
                   />
-                  {errors.loanGiverName && <p className="mt-1 text-sm text-red-600">{errors.loanGiverName.message}</p>}
+                  {errors.loanGiverName && <p className="text-sm text-coral mt-1">{errors.loanGiverName.message}</p>}
                 </div>
               </div>
 
-              <div>
+              {/* Right Column */}
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Borrower's Phone *</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">Phone</label>
                   <input
-                    {...register('loanGiverPhoneNumber', { required: 'Phone number is required', pattern: { value: /^\d{10,15}$/, message: 'Invalid phone number' } })}
+                    {...register('loanGiverPhoneNumber', { 
+                      required: 'Phone is required', 
+                      pattern: { value: /^\d{10,15}$/, message: 'Invalid phone number' } 
+                    })}
                     type="tel"
                     required
-                    className="mt-1 block w-full text-black border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="input-modern w-full placeholder-gray-400"
                     placeholder="Phone number"
                   />
-                  {errors.loanGiverPhoneNumber && <p className="mt-1 text-sm text-red-600">{errors.loanGiverPhoneNumber.message}</p>}
+                  {errors.loanGiverPhoneNumber && <p className="text-sm text-coral mt-1">{errors.loanGiverPhoneNumber.message}</p>}
                 </div>
-  
-                        <div>
-                  <label className="block text-sm mt-5 font-medium text-gray-700">Reason *</label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">Reason</label>
                   <input
                     {...register('reason', { required: 'Reason is required' })}
                     type="text"
                     required
-                    className="mt-1 block w-full text-black border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="input-modern w-full placeholder-gray-400"
                     placeholder="Loan purpose"
                   />
-                  {errors.reason && <p className="mt-1 text-sm text-red-600">{errors.reason.message}</p>}
+                  {errors.reason && <p className="text-sm text-coral mt-1">{errors.reason.message}</p>}
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isCreatingLoan || !user}
-                className="w-full col-span-2 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full col-span-1 md:col-span-2 bg-gradient-peach-coral text-balck font-medium py-3 px-4 sm:px-6 rounded-xl hover:shadow-soft-lg transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 border border-black/10"
               >
-                {isCreatingLoan ? 'Creating...' : 'Create Loan'}
+                <span>{isCreatingLoan ? 'Creating...' : 'Create Loan'}</span>
               </button>
             </form>
           </div>
 
-          {/* Loans Overview */}
-          <div className="col-span-8 grid grid-cols-2 gap-5">
-            <PayableList phoneNumber={user.phoneNumber} />
-            <ReceivableList phoneNumber={user.phoneNumber} />
+          {/* Summary Cards */}
+          <div className="col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="slide-in" style={{animationDelay: '0.2s'}}>
+              <PayableList phoneNumber={user?.phoneNumber as string} />
+            </div>
+            <div className="slide-in" style={{animationDelay: '0.3s'}}>
+              <ReceivableList phoneNumber={user?.phoneNumber as string} />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

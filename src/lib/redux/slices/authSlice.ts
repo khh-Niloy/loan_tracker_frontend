@@ -21,7 +21,7 @@ const getInitialState = (): AuthState => {
     if (!accessToken) {
       // Try to load from cookie if not in localStorage
       const cookies = document.cookie.split(';');
-      for (let cookie of cookies) {
+      for (const cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'token') {
           accessToken = value;
@@ -83,7 +83,7 @@ const authSlice = createSlice({
         if (!token) {
           // Try to load from cookie if not in localStorage
           const cookies = document.cookie.split(';');
-          for (let cookie of cookies) {
+          for (const cookie of cookies) {
             const [name, value] = cookie.trim().split('=');
             if (name === 'token') {
               token = value;

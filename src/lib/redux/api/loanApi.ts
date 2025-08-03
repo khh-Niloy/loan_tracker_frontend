@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const loanApi = createApi({
   reducerPath: 'loanApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000/api/v1',
+    baseUrl: 'https://loan-tracker-blond.vercel.app/api/v1',
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth.accessToken;
       if (token) {
@@ -37,7 +37,7 @@ export const loanApi = createApi({
       transformResponse: (response: any) => {
         // console.log('getLoans response:', response);
         // Handle response structure: { status, data: { list: [...] } }
-        return response.data?.list || response.data || response;
+        return response.data || response;
       },
     }),
     getReceivables: builder.query<Loan[], string>({
@@ -46,7 +46,7 @@ export const loanApi = createApi({
       transformResponse: (response: any) => {
         // console.log('getReceivables response:', response);
         // Handle response structure: { status, data: { list: [...] } }
-        return response.data?.list || response.data || response;
+        return response.data || response;
       },
     }),
     updateLoan: builder.mutation<Loan, UpdateLoanRequest>({

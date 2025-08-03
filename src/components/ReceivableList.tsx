@@ -1,152 +1,110 @@
 'use client';
 
-import { useGetReceivablesQuery, useUpdateLoanMutation } from '@/lib/redux/api/loanApi';
-import { useState } from 'react';
+import { useGetReceivablesQuery } from '@/lib/redux/api/loanApi';
 
 interface ReceivableListProps {
   phoneNumber: string;
 }
 
-interface Loan {
-  transactionId: string;
-  loanGiverPhoneNumber: string;
-  loanTakerPhoneNumber: string;
-  amount: number;
-  amountPaid: number;
-  amountLeft: number;
-  reason: string;
-  loanTakerName: string;
-  loanGiverName: string;
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-}
-
 export default function ReceivableList({ phoneNumber }: ReceivableListProps) {
-  const { data, refetch, isLoading, error } = useGetReceivablesQuery(phoneNumber);
-  
+  const { data, isLoading, error } = useGetReceivablesQuery(phoneNumber);
+
   const response = data as any;
-  const receivables: Loan[] = response?.data?.list || response || [];
+  const receivables: any[] = response?.list || response || [];
 
-  const LoanUpdateForm = ({ loan, onSuccess }: { loan: Loan; onSuccess: () => void }) => {
-    const [amount, setAmount] = useState('');
-    const [note, setNote] = useState('');
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [updateLoan] = useUpdateLoanMutation();
-
-    const handleUpdate = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!amount) return;
-
-      setIsUpdating(true);
-      try {
-        await updateLoan({
-          transactionId: loan.transactionId,
-          amount: parseFloat(amount),
-          note: note || undefined
-        }).unwrap();
-        setAmount('');
-        setNote('');
-        onSuccess();
-      } catch (error) {
-        console.error('Failed to update loan:', error);
-      } finally {
-        setIsUpdating(false);
-      }
-    };
-
-    return (
-      <form onSubmit={handleUpdate} className="mt-4 space-y-2">
-        <div className="flex gap-2">
-          <input
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount to pay"
-            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
-            required
-          />
-          <button
-            type="submit"
-            disabled={isUpdating || !amount}
-            className="px-3 py-1 bg-green-600 text-white rounded text-sm disabled:opacity-50"
-          >
-            {isUpdating ? '...' : 'Pay'}
-          </button>
-        </div>
-        <input
-          type="text"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Note (optional)"
-          className="w-full border border-gray-300 rounded px-2 py-1 text-sm mb-2"
-        />
-        <button
-            onClick={async () => {
-              try {
-                setIsUpdating(true);
-                await updateLoan({
-                  transactionId: loan.transactionId,
-                  fullPay: true,
-                  note: note || undefined
-                }).unwrap();
-                setAmount('');
-                setNote('');
-                onSuccess();
-              } catch (error) {
-                console.error('Failed full pay:', error);
-              } finally {
-                setIsUpdating(false);
-              }
-            }}
-            disabled={isUpdating}
-            className="w-full px-3 py-1 bg-red-600 text-white rounded text-sm disabled:opacity-50"
-          >
-            {isUpdating ? '...' : 'Full Pay'}
-          </button>
-      </form>
-    );
-  };
+  const sortedReceivables = [...receivables].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
-        My Receivables ({receivables.length})
-      </h3>
+    <div className="card-modern">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-display font-medium text-charcoal">
+          Receivables <span className="text-sm text-gray-500">({receivables.length})</span>
+        </h3>
+        <div className="flex gap-3 items-center justify-center">
+          <span className="text-xs text-gray-500 font-light">Total</span>
+          <p className="text-base font-display font-medium text-charcoal">{response?.total || 0} tk</p>
+        </div>
+      </div>
       
       {isLoading && (
-        <div className="animate-pulse space-y-3">
-          <div className="h-28 bg-gray-200 rounded"></div>
-          <div className="h-28 bg-gray-200 rounded"></div>
+        <div className="space-y-3">
+          <div className="h-24 bg-gray-100 rounded-xl animate-pulse"></div>
+          <div className="h-24 bg-gray-100 rounded-xl animate-pulse"></div>
         </div>
       )}
 
       {error && (
-        <p className="text-red-500">Error loading receivables</p>
+        <div className="bg-coral/10 border-l-4 border-coral p-4 rounded-r-xl">
+          <p className="text-sm text-coral font-medium">Error loading receivables</p>
+        </div>
       )}
 
       {!isLoading && !error && (
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          {receivables.map((loan) => (
-            <div key={loan.transactionId} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start">
+        <div className="space-y-3 max-h-[30rem] overflow-y-auto pr-2">
+          {sortedReceivables.map((loan, index) => (
+            <div 
+              key={loan.transactionId} 
+              className={`p-4 rounded-xl border transition-all duration-300 ${
+                loan.amount === 0 
+                  ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200/80 shadow-soft-lg backdrop-blur-sm' 
+                  : 'bg-white border-gray-200/80 hover:shadow-xl hover:border-gray-300'
+              } slide-in`}
+              style={{animationDelay: `${index * 0.1}s`}}
+            >
+              <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="font-medium">{loan.loanTakerName}</p>
-                  <p className="text-sm text-gray-600">{loan.loanTakerPhoneNumber}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-inter font-medium text-charcoal">
+                      {loan?.loanTaker_Info?.name}
+                    </p>
+                    {loan.amount === 0 && (
+                      <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                        ✓ Received
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 font-light">
+                    {loan?.loanTaker_Info?.phoneNumber}
+                  </p>
                 </div>
-                <p className="font-bold text-lg">${loan.amount}</p>
+                <div className="text-right">
+                  <p className="text-lg font-display font-semibold text-charcoal">
+                    {loan.amount} tk
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(loan.createdAt).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </p>
+                </div>
               </div>
-              <div className="mt-2 text-sm">
-                <p>Total: ${loan.amount}</p>
-                <p>Paid: ${loan.amountPaid}</p>
-                <p>Pending: ${loan.amountLeft}</p>
-              </div>
-              <LoanUpdateForm loan={loan} onSuccess={refetch} />
+              
+              <p className="text-sm text-gray-600 mb-2">{loan.reason}</p>
+              
+              {loan.notes && loan.notes.length > 0 && (
+                <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs font-medium text-gray-500 mb-2">Received Records</p>
+                  {loan.notes.map(({noteMessage, amount}: any, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center text-xs text-gray-600 bg-white px-2 py-1 rounded">
+                      <span>{noteMessage || `Payment ${idx + 1}`}</span>
+                      <span className="font-medium">{amount} tk</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              
             </div>
           ))}
+          
           {receivables.length === 0 && (
-            <p className="text-gray-500 text-center py-4">No receivables</p>
+            <div className="text-center py-12">
+              <div className="text-4xl mb-2">💰</div>
+              <p className="text-sm text-gray-500 font-light">No receivables</p>
+            </div>
           )}
         </div>
       )}

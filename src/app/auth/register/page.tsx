@@ -55,66 +55,81 @@ export default function RegistrationPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream via-vanilla to-white py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome to Loan Tracker
+        <div className="text-center slide-in">
+          <h1 className="text-4xl font-display font-medium text-charcoal mb-2">LoanTracker</h1>
+          <h2 className="text-xl font-display font-light text-gray-600">
+            {`Let's get you started`}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Let's get you started
+          <p className="mt-2 text-sm text-gray-500">
+            Create your account to start tracking loans
           </p>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="name" className="sr-only">Full Name</label>
-              <input
-                {...register('name', { required: 'Name is required' })}
-                id="name"
-                type="text"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
-              />
-              {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
-            </div>
-            
-            <div>
-              <label htmlFor="phoneNumber" className="sr-only">Phone Number</label>
-              <input
-                {...register('phoneNumber', { 
-                  required: 'Phone number is required',
-                  pattern: {
-                    value: /^[0-9]{10,15}$/,
-                    message: 'Please enter a valid phone number'
-                  }
-                })}
-                id="phoneNumber"
-                type="tel"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Phone Number"
-              />
-              {errors.phoneNumber && <p className="mt-2 text-sm text-red-600">{errors.phoneNumber.message}</p>}
-            </div>
-          </div>
 
-          <div>
+        <div className="card-modern slide-in" style={{animationDelay: '0.1s'}}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-600 mb-2">
+                  Full Name
+                </label>
+                <input
+                  {...register('name', { required: 'Name is required' })}
+                  id="name"
+                  type="text"
+                  className="input-modern w-full placeholder-gray-400 focus:border-coral"
+                  placeholder="Enter your full name"
+                />
+                {errors.name && <p className="text-sm text-coral mt-1">{errors.name.message}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-600 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  {...register('phoneNumber', { 
+                    required: 'Phone number is required',
+                    pattern: {
+                      value: /^[0-9]{10,15}$/,
+                      message: 'Please enter a valid phone number'
+                    }
+                  })}
+                  id="phoneNumber"
+                  type="tel"
+                  className="input-modern w-full placeholder-gray-400 focus:border-coral"
+                  placeholder="Enter your phone number"
+                />
+                {errors.phoneNumber && <p className="text-sm text-coral mt-1">{errors.phoneNumber.message}</p>}
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full gradient-peach-coral text-black font-medium py-3 px-6 rounded-xl hover:shadow-soft-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover-lift"
             >
               {isLoading ? (
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : null}
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="loading-dots">Creating account</span>
+                </span>
+              ) : (
+                'Create Account'
+              )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-400 font-light">
+            By creating an account, you agree to track your loans responsibly
+          </p>
+        </div>
       </div>
     </div>
   );

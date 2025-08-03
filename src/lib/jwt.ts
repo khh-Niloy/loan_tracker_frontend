@@ -25,7 +25,7 @@ export function decodeJWT(token: string): { name: string; phoneNumber: string } 
     }).join(''));
     
     const decoded: JWTPayload = JSON.parse(jsonPayload);
-    console.log('JWT Decoded:', decoded);
+    // console.log('JWT Decoded:', decoded);
     
     // Handle various JWT formats
     if (decoded.user) {
