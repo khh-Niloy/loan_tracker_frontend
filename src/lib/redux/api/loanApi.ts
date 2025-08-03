@@ -5,11 +5,8 @@ export const loanApi = createApi({
   reducerPath: 'loanApi',
   baseQuery: fetchBaseQuery({
     baseUrl: 'https://loan-tracker-blond.vercel.app/api/v1',
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.accessToken;
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-      }
+    credentials: 'include', // Include cookies in requests
+    prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;
     },

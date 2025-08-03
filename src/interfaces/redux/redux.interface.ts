@@ -6,7 +6,7 @@ export interface CreateUserRequest {
 export interface CreateUserResponse {
   message: string;
   data: {
-    newUser: {
+    person: {
       name: string;
       phoneNumber: string;
     };

@@ -33,15 +33,19 @@ export default function RegistrationPage() {
   const onSubmit = async (data: RegistrationForm) => {
     setIsLoading(true);
     try {
+
+      console.log(data)
       const response = await createUser(data).unwrap();
-      const { newUser, token } = response.data;
+      console.log(response)
+      const { person, token } = response.data;
+      console.log(person)
       
       // Store user info and navigate to home
       // The backend cookie will handle authentication
       dispatch(setAuth({
         user: {
-          name: newUser.name,
-          phoneNumber: newUser.phoneNumber
+          name: person.name,
+          phoneNumber: person.phoneNumber
         },
         token: token
       }));
