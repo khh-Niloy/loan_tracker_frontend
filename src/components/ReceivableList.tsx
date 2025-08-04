@@ -77,7 +77,11 @@ export default function ReceivableList({ phoneNumber }: ReceivableListProps) {
                     {new Date(loan.createdAt).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
-                    })}
+                    })} {new Date(loan.createdAt).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true
+                    }).toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -87,9 +91,23 @@ export default function ReceivableList({ phoneNumber }: ReceivableListProps) {
               {loan.notes && loan.notes.length > 0 && (
                 <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs font-medium text-gray-500 mb-2">Received Records</p>
-                  {loan.notes.map(({noteMessage, amount}: any, idx: number) => (
+                  {loan.notes.map(({noteMessage, amount, time}: any, idx: number) => (
                     <div key={idx} className="flex justify-between items-center text-xs text-gray-600 bg-white px-2 py-1 rounded">
-                      <span>{noteMessage || `Payment ${idx + 1}`}</span>
+                      <div className="flex flex-col">
+                        <span>{noteMessage || `Payment ${idx + 1}`}</span>
+                        {time && (
+                          <span className="text-xs text-gray-400 mt-0.5">
+                            {new Date(time).toLocaleDateString("en-GB", {
+                              day: "numeric",
+                              month: "short"
+                            })} {new Date(time).toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true
+                            }).toLowerCase()}
+                          </span>
+                        )}
+                      </div>
                       <span className="font-medium">{amount} tk</span>
                     </div>
                   ))}

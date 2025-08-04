@@ -10,30 +10,32 @@ interface PayableListProps {
 
 export default function PayableList({ phoneNumber }: PayableListProps) {
   const { data, isLoading, error } = useGetLoansQuery(phoneNumber);
-  const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [amounts, setAmounts] = useState<{[key: string]: string}>({});
+  const [notes, setNotes] = useState<{[key: string]: string}>({});
+  const [isUpdating, setIsUpdating] = useState<{[key: string]: boolean}>({});
   const [updateLoan] = useUpdateLoanMutation();
 
   const handleUpdate = async (e: React.FormEvent, loan: any) => {
     e.preventDefault();
+    const amount = amounts[loan.transactionId];
+    const note = notes[loan.transactionId];
     if (!amount) return;
 
-    setIsUpdating(true);
+    setIsUpdating(prev => ({...prev, [loan.transactionId]: true}));
     try {
       await updateLoan({
         transactionId: loan.transactionId,
         amount: parseFloat(amount),
         note: note || undefined
       }).unwrap();
-      setAmount('');
-      setNote('');
+      setAmounts(prev => ({...prev, [loan.transactionId]: ''}));
+      setNotes(prev => ({...prev, [loan.transactionId]: ''}));
       toast.success('💸 Payment updated!');
     } catch (error) {
       console.error('Failed to update loan:', error);
       toast.error('Payment failed');
     } finally {
-      setIsUpdating(false);
+      setIsUpdating(prev => ({...prev, [loan.transactionId]: false}));
     }
   };
 
@@ -105,7 +107,11 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
                     {new Date(loan.createdAt).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
-                    })}
+                    })} {new Date(loan.createdAt).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true
+                    }).toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -117,7 +123,21 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
                   <p className="text-xs font-medium text-gray-500 mb-2">Payment Records</p>
                   {loan.notes.map(({noteMessage, amount, time}: any, idx: number) => (
                     <div key={idx} className="flex justify-between items-center text-xs text-gray-600 bg-white px-2 py-1 rounded">
-                      <span>{noteMessage || `Payment ${idx + 1}`}</span>
+                      <div className="flex flex-col">
+                        <span>{noteMessage || `Payment ${idx + 1}`}</span>
+                        {time && (
+                          <span className="text-xs text-gray-400 mt-0.5">
+                            {new Date(time).toLocaleDateString("en-GB", {
+                              day: "numeric",
+                              month: "short"
+                            })} {new Date(time).toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true
+                            }).toLowerCase()}
+                          </span>
+                        )}
+                      </div>
                       <span className="font-medium">{amount} tk</span>
                     </div>
                   ))}
@@ -131,8 +151,8 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
         <input
           type="number"
           step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          value={amounts[loan.transactionId] || ''}
+          onChange={(e) => setAmounts(prev => ({...prev, [loan.transactionId]: e.target.value}))}
           placeholder="Amount to pay"
           className="flex-1 bg-white/50 border border-sage/20 rounded-lg px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-sage focus:ring-0 focus:outline-none transition-all duration-200"
           required
@@ -140,8 +160,8 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
       </div>
       <input
         type="text"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
+        value={notes[loan.transactionId] || ''}
+        onChange={(e) => setNotes(prev => ({...prev, [loan.transactionId]: e.target.value}))}
         placeholder="Note (optional)"
         className="w-full bg-white/50 border border-sage/20 rounded-lg px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-sage focus:ring-0 focus:outline-none transition-all duration-200 mb-2"
       />
@@ -149,67 +169,72 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
         <button
           type="button"
           onClick={async () => {
+            const amount = amounts[loan.transactionId];
+            const note = notes[loan.transactionId];
             if (!amount) return;
             try {
-              setIsUpdating(true);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: true}));
               await updateLoan({
                 transactionId: loan.transactionId,
                 amount: parseInt(amount),
                 note: undefined
               }).unwrap();
-              setAmount('');
+              setAmounts(prev => ({...prev, [loan.transactionId]: ''}));
               toast.success('Payment made successfully!');
             } catch (error) {
               console.error('Failed to pay:', error);
               toast.error('Failed to make payment. Please try again.');
             } finally {
-              setIsUpdating(false);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: false}));
             }
           }}
-          disabled={isUpdating || !amount || !!note}
+          disabled={isUpdating[loan.transactionId] || !amounts[loan.transactionId] || !!notes[loan.transactionId]}
           className="flex-1 px-3 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-medium shadow-soft hover:shadow-md hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          {isUpdating ? 'Processing...' : 'Pay'}
+          {isUpdating[loan.transactionId] ? 'Processing...' : 'Pay'}
         </button>
         <button
           type="button"
           onClick={async () => {
+            const amount = amounts[loan.transactionId];
+            const note = notes[loan.transactionId];
             if (!amount) return;
             try {
-              setIsUpdating(true);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: true}));
               await updateLoan({
                 transactionId: loan.transactionId,
                 amount: parseInt(amount),
                 note: note || undefined
               }).unwrap();
-              setAmount('');
-              setNote('');
+              setAmounts(prev => ({...prev, [loan.transactionId]: ''}));
+              setNotes(prev => ({...prev, [loan.transactionId]: ''}));
               toast.success('Note added and payment made successfully!');
             } catch (error) {
               console.error('Failed to add note and pay:', error);
               toast.error('Failed to add note and make payment. Please try again.');
             } finally {
-              setIsUpdating(false);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: false}));
             }
           }}
-          disabled={isUpdating || !amount || !note}
+          disabled={isUpdating[loan.transactionId] || !amounts[loan.transactionId] || !notes[loan.transactionId]}
           className="flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium shadow-soft hover:shadow-md hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          {isUpdating ? 'Processing...' : 'Add Note & Pay'}
+          {isUpdating[loan.transactionId] ? 'Processing...' : 'Add Note & Pay'}
         </button>
       </div>
       <button
           onClick={async () => {
+            const note = notes[loan.transactionId];
             try {
-              setIsUpdating(true);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: true}));
               await updateLoan({
                 transactionId: loan.transactionId,
                 amount: loan.amount,
                 fullPay: true,
                 note: note || undefined
               }).unwrap();
-              setAmount('');
-              setNote('');
+              setAmounts(prev => ({...prev, [loan.transactionId]: ''}));
+              setNotes(prev => ({...prev, [loan.transactionId]: ''}));
               toast.success('Loan paid in full!');
             } catch (error) {
               console.error('Full pay error details:', error);
@@ -218,13 +243,13 @@ export default function PayableList({ phoneNumber }: PayableListProps) {
               }
               toast.error('Failed to complete full payment. Please try again.');
             } finally {
-              setIsUpdating(false);
+              setIsUpdating(prev => ({...prev, [loan.transactionId]: false}));
             }
           }}
-          disabled={isUpdating || loan.amount === 0}
+          disabled={isUpdating[loan.transactionId] || loan.amount === 0}
           className="w-full px-3 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-lg text-sm font-medium shadow-soft hover:shadow-md hover:from-slate-700 hover:to-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          {isUpdating ? 'Processing...' : 'Full Pay'}
+          {isUpdating[loan.transactionId] ? 'Processing...' : 'Full Pay'}
         </button>
     </form>
               </div>
